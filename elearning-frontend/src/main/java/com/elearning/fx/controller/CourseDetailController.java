@@ -334,8 +334,20 @@ public class CourseDetailController implements Initializable {
         descField.setPrefRowCount(2);
         TextField linkField = new TextField();
         linkField.setPromptText("https://meet.google.com/...");
-        TextField dateField = new TextField();
-        dateField.setPromptText("2025-01-15 14:00:00");
+        
+        // Date and Time inputs
+        DatePicker datePicker = new DatePicker();
+        datePicker.setPromptText("Date");
+        ComboBox<String> hourCombo = new ComboBox<>();
+        for (int i = 0; i <= 23; i++) hourCombo.getItems().add(String.format("%02d", i));
+        hourCombo.getSelectionModel().select("14");
+        
+        ComboBox<String> minuteCombo = new ComboBox<>();
+        for (int i = 0; i < 60; i += 5) minuteCombo.getItems().add(String.format("%02d", i));
+        minuteCombo.getSelectionModel().select("00");
+        
+        HBox timeBox = new HBox(5, datePicker, new Label(" à "), hourCombo, new Label(":"), minuteCombo);
+        timeBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         grid.add(new Label("Titre :"), 0, 0);
         grid.add(titleField, 1, 0);
@@ -344,18 +356,25 @@ public class CourseDetailController implements Initializable {
         grid.add(new Label("Lien (Meet/Zoom) :"), 0, 2);
         grid.add(linkField, 1, 2);
         grid.add(new Label("Date & Heure :"), 0, 3);
-        grid.add(dateField, 1, 3);
+        grid.add(timeBox, 1, 3);
 
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogBtn -> {
             if (dialogBtn == createBtn) {
+                // Validation de base
+                if (datePicker.getValue() == null) return null;
+                
+                String dateStr = datePicker.getValue().toString();
+                String timeStr = hourCombo.getValue() + ":" + minuteCombo.getValue() + ":00";
+                
                 JsonObject session = new JsonObject();
                 session.addProperty("courseId", courseId);
                 session.addProperty("title", titleField.getText());
                 session.addProperty("description", descField.getText());
                 session.addProperty("meetingLink", linkField.getText());
-                session.addProperty("startTime", dateField.getText());
+                // Spring Boot (Jackson) attend par défaut le format ISO-8601 avec le séparateur 'T'
+                session.addProperty("startTime", dateStr + "T" + timeStr);
                 return session;
             }
             return null;
@@ -367,7 +386,8 @@ public class CourseDetailController implements Initializable {
                     ApiClient.createSession(session);
                     Platform.runLater(this::loadCourseData);
                 } catch (Exception e) {
-                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer la séance"));
+                    e.printStackTrace();
+                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer la séance : " + e.getMessage()));
                 }
             }).start();
         });

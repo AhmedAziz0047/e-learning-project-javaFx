@@ -258,6 +258,9 @@ public class ApiClient {
         addAuthHeader(builder);
 
         HttpResponse<String> response = httpClient.send(builder.build(), BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new IOException("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
@@ -268,6 +271,9 @@ public class ApiClient {
         addAuthHeader(builder);
 
         HttpResponse<String> response = httpClient.send(builder.build(), BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new IOException("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
         Type listType = new TypeToken<List<JsonObject>>() {}.getType();
 
         // Gérer le cas où la réponse est un objet paginé
@@ -292,6 +298,9 @@ public class ApiClient {
         addAuthHeader(builder);
 
         HttpResponse<String> response = httpClient.send(builder.build(), BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new IOException("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
@@ -303,6 +312,9 @@ public class ApiClient {
         addAuthHeader(builder);
 
         HttpResponse<String> response = httpClient.send(builder.build(), BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new IOException("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
         return gson.fromJson(response.body(), JsonObject.class);
     }
 
@@ -312,7 +324,10 @@ public class ApiClient {
                 .DELETE();
         addAuthHeader(builder);
 
-        httpClient.send(builder.build(), BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(builder.build(), BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new IOException("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
     }
 
     private static void addAuthHeader(HttpRequest.Builder builder) {
