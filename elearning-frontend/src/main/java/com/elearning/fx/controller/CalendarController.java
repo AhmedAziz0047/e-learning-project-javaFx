@@ -200,26 +200,43 @@ public class CalendarController implements Initializable {
         ComboBox<String> typeBox = new ComboBox<>();
         typeBox.getItems().addAll("COURS", "SEANCE_LIVE", "EXAMEN", "PROJET", "CERTIFICATION");
         typeBox.setValue("COURS");
-        TextField dateField = new TextField();
-        dateField.setPromptText("2025-01-15 14:00:00");
+        
+        // Date and Time inputs
+        DatePicker datePicker = new DatePicker();
+        datePicker.setPromptText("Date");
+        ComboBox<String> hourCombo = new ComboBox<>();
+        for (int i = 0; i <= 23; i++) hourCombo.getItems().add(String.format("%02d", i));
+        hourCombo.getSelectionModel().select("14");
+        
+        ComboBox<String> minuteCombo = new ComboBox<>();
+        for (int i = 0; i < 60; i += 5) minuteCombo.getItems().add(String.format("%02d", i));
+        minuteCombo.getSelectionModel().select("00");
+        
+        HBox timeBox = new HBox(5, datePicker, new Label(" à "), hourCombo, new Label(":"), minuteCombo);
+        timeBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         TextField durationField = new TextField();
         durationField.setPromptText("60");
 
         grid.add(new Label("Titre :"), 0, 0); grid.add(titleField, 1, 0);
         grid.add(new Label("Description :"), 0, 1); grid.add(descField, 1, 1);
         grid.add(new Label("Type :"), 0, 2); grid.add(typeBox, 1, 2);
-        grid.add(new Label("Date & Heure :"), 0, 3); grid.add(dateField, 1, 3);
+        grid.add(new Label("Date & Heure :"), 0, 3); grid.add(timeBox, 1, 3);
         grid.add(new Label("Durée (min) :"), 0, 4); grid.add(durationField, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogBtn -> {
             if (dialogBtn == createBtn) {
+                if (datePicker.getValue() == null) return null;
+                
+                String dateStr = datePicker.getValue().toString();
+                String timeStr = hourCombo.getValue() + ":" + minuteCombo.getValue() + ":00";
+                
                 JsonObject event = new JsonObject();
                 event.addProperty("title", titleField.getText());
                 event.addProperty("description", descField.getText());
                 event.addProperty("eventType", typeBox.getValue());
-                event.addProperty("eventDate", dateField.getText());
+                event.addProperty("eventDate", dateStr + "T" + timeStr);
                 try { event.addProperty("durationMinutes", Integer.parseInt(durationField.getText())); }
                 catch (Exception ignored) {}
                 return event;
@@ -233,7 +250,8 @@ public class CalendarController implements Initializable {
                     ApiClient.createEvent(event);
                     Platform.runLater(() -> { updateCalendar(); loadUpcomingEvents(); });
                 } catch (Exception e) {
-                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer l'événement"));
+                    e.printStackTrace();
+                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer l'événement : " + e.getMessage()));
                 }
             }).start();
         });
