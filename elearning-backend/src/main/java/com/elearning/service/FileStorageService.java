@@ -77,6 +77,7 @@ public class FileStorageService {
 
         // Sauvegarde du fichier
         Path targetPath = Paths.get(targetDir).resolve(storedFilename);
+        Files.createDirectories(targetPath.getParent());
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
         // Enregistrement en base
@@ -120,6 +121,7 @@ public class FileStorageService {
         String storedFilename = UUID.randomUUID() + extension;
 
         Path targetPath = Paths.get(targetDir).resolve(storedFilename);
+        Files.createDirectories(targetPath.getParent());
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
         existing.setResourceName(originalFilename);

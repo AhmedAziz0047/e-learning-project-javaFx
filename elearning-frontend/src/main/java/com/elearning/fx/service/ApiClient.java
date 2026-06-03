@@ -121,13 +121,30 @@ public class ApiClient {
         String fileName = filePath.getFileName().toString();
         byte[] fileBytes = java.nio.file.Files.readAllBytes(filePath);
 
+        // Guess MIME type
+        String mimeType = java.nio.file.Files.probeContentType(filePath);
+        if (mimeType == null) {
+            String ext = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase() : "";
+            mimeType = switch (ext) {
+                case "pdf" -> "application/pdf";
+                case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+                case "jpg", "jpeg" -> "image/jpeg";
+                case "png" -> "image/png";
+                case "mp4" -> "video/mp4";
+                case "avi" -> "video/x-msvideo";
+                case "mov" -> "video/quicktime";
+                default -> "application/octet-stream";
+            };
+        }
+
         // Construire le multipart
         String lineEnd = "\r\n";
         StringBuilder sb = new StringBuilder();
         sb.append("--").append(boundary).append(lineEnd);
         sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"")
                 .append(fileName).append("\"").append(lineEnd);
-        sb.append("Content-Type: application/octet-stream").append(lineEnd);
+        sb.append("Content-Type: ").append(mimeType).append(lineEnd);
         sb.append(lineEnd);
 
         byte[] header = sb.toString().getBytes();

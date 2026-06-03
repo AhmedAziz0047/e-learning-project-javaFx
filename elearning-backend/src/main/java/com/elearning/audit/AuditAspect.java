@@ -102,15 +102,26 @@ public class AuditAspect {
     private String buildPayload(Object[] args) {
         try {
             if (args != null && args.length > 0) {
-                // Sérialiser les arguments en JSON (limiter la taille)
-                String json = objectMapper.writeValueAsString(args);
+                // Filtrer les objets non sérialisables
+                Object[] safeArgs = java.util.Arrays.stream(args)
+                        .map(arg -> {
+                            if (arg instanceof org.springframework.web.multipart.MultipartFile file) {
+                                return "File: " + file.getOriginalFilename() + " (" + file.getSize() + " bytes)";
+                            } else if (arg instanceof jakarta.servlet.http.HttpServletRequest || arg instanceof jakarta.servlet.http.HttpServletResponse) {
+                                return "ServletObject";
+                            }
+                            return arg;
+                        })
+                        .toArray();
+
+                String json = objectMapper.writeValueAsString(safeArgs);
                 if (json.length() > 2000) {
                     json = json.substring(0, 2000) + "...";
                 }
                 return json;
             }
         } catch (Exception e) {
-            log.debug("Impossible de sérialiser le payload de l'audit");
+            log.debug("Impossible de sérialiser le payload de l'audit : {}", e.getMessage());
         }
         return "{}";
     }
