@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ElearningFxApp" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.elearning.fx.ElearningFxApp" />
+    <module name="elearning-frontend" />
+    <option name="VM_PARAMETERS" value="--module-path &quot;$PROJECT_DIR$/target/javafx-lib&quot; --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.web" />
+    <method v="2">
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="compile" />
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

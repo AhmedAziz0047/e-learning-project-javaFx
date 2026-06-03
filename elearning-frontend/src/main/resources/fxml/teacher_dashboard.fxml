@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.TeacherDashboardController"
+      styleClass="page-root" spacing="20" prefWidth="1200" prefHeight="750">
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button fx:id="backButton" text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+        <Label text="📊 Tableau de Bord Enseignant" styleClass="page-title"/>
+    </HBox>
+
+    <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="40" prefHeight="40"/>
+
+    <!-- Statistiques -->
+    <FlowPane fx:id="statsPane" hgap="15" vgap="15"/>
+
+    <!-- Graphiques -->
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox fx:id="chartsBox" spacing="20">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.LiveSessionsController"
+      styleClass="page-root" spacing="20" prefWidth="1200" prefHeight="750">
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button fx:id="backButton" text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+        <Label text="🎥 Séances en Direct" styleClass="page-title"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox spacing="25">
+            <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+
+            <Label text="🟢 En cours" styleClass="section-title"/>
+            <VBox fx:id="liveSessionsBox" spacing="10"/>
+
+            <Separator/>
+
+            <Label text="🟡 Planifiées" styleClass="section-title"/>
+            <VBox fx:id="upcomingSessionsBox" spacing="10"/>
+        </VBox>
+    </ScrollPane>
+</VBox>

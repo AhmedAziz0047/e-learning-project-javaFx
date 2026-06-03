@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.DashboardController"
+      styleClass="dashboard-root" prefWidth="1200" prefHeight="750">
+
+    <!-- Menu latéral -->
+    <VBox fx:id="sideMenu" spacing="5" styleClass="side-menu" prefWidth="220">
+        <padding><Insets top="20" right="10" bottom="20" left="10"/></padding>
+
+        <Label text="🎓 E-Learning" styleClass="menu-brand"/>
+
+        <Separator/>
+
+        <Button fx:id="coursesButton" text="📚  Cours" onAction="#handleCourses"
+                styleClass="menu-button" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+        <Button fx:id="calendarButton" text="📅  Calendrier" onAction="#handleCalendar"
+                styleClass="menu-button" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+        <Button fx:id="liveButton" text="🎥  Séances Live" onAction="#handleLive"
+                styleClass="menu-button" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+        <Button fx:id="dashboardTeacherButton" text="📊  Statistiques" onAction="#handleTeacherDashboard"
+                styleClass="menu-button" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+        <Button fx:id="auditButton" text="🔍  Audit" onAction="#handleAudit"
+                styleClass="menu-button" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <Separator/>
+
+        <Button fx:id="logoutButton" text="🚪  Déconnexion" onAction="#handleLogout"
+                styleClass="menu-button-danger" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <VBox fx:id="contentArea" spacing="20" HBox.hgrow="ALWAYS" styleClass="content-area">
+        <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+        <!-- En-tête -->
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <VBox>
+                <Label fx:id="welcomeLabel" styleClass="welcome-title"/>
+                <Label fx:id="roleLabel" styleClass="role-badge"/>
+            </VBox>
+        </HBox>
+
+        <!-- Cartes statistiques -->
+        <FlowPane fx:id="statsPane" hgap="15" vgap="15"/>
+
+        <!-- Cours récents -->
+        <Label text="Cours récents" styleClass="section-title"/>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+            <VBox fx:id="recentCoursesBox" spacing="10">
+                <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+            </VBox>
+        </ScrollPane>
+    </VBox>
+</HBox>

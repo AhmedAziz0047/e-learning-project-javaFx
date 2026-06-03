@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: elearning-backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/elearning_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Africa/Algiers
+
+# JWT Configuration
+app:
+  jwt:
+    secret: MaSuperCleSecretePourJWTQuiDoitEtreTresLonguePourLaSecuriteDeNotrePlateforme2024ElearningPlatform
+    expiration-ms: 86400000  # 24 heures
+
+  upload:
+    dir: ./uploads
+    videos-dir: ./uploads/videos
+    images-dir: ./uploads/images
+    documents-dir: ./uploads/documents
+    max-file-size: 524288000  # 500 MB
+
+# Logging
+logging:
+  level:
+    com.elearning: DEBUG
+    org.springframework.security: INFO

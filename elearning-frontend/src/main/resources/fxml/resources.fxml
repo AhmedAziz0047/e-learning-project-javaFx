@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.ResourcesController"
+      styleClass="page-root" spacing="20" prefWidth="1200" prefHeight="750">
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button fx:id="backButton" text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+        <Label fx:id="titleLabel" text="📎 Ressources Pédagogiques" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="uploadButton" text="⬆ Uploader une ressource" onAction="#handleUpload" styleClass="btn-primary"/>
+    </HBox>
+
+    <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="40" prefHeight="40"/>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox fx:id="resourcesBox" spacing="10">
+            <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+        </VBox>
+    </ScrollPane>
+</VBox>

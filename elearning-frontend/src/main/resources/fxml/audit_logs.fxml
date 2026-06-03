@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.AuditLogsController"
+      styleClass="page-root" spacing="20" prefWidth="1200" prefHeight="750">
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button fx:id="backButton" text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+        <Label text="🔍 Logs d'Audit" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="searchField" promptText="Rechercher par action..." styleClass="search-input"
+                   onAction="#handleSearch" prefWidth="250"/>
+    </HBox>
+
+    <TableView fx:id="auditTable" VBox.vgrow="ALWAYS" styleClass="audit-table">
+        <columns>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="160"/>
+            <TableColumn fx:id="colUser" text="Utilisateur" prefWidth="150"/>
+            <TableColumn fx:id="colAction" text="Action" prefWidth="170"/>
+            <TableColumn fx:id="colEntity" text="Entité" prefWidth="130"/>
+            <TableColumn fx:id="colResult" text="Résultat" prefWidth="90"/>
+            <TableColumn fx:id="colIp" text="Adresse IP" prefWidth="120"/>
+            <TableColumn fx:id="colDuration" text="Durée" prefWidth="80"/>
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER" spacing="15">
+        <Button fx:id="prevPageButton" text="◀ Précédent" onAction="#handlePrevPage" styleClass="btn-nav"/>
+        <Label fx:id="pageLabel" text="Page 1 / 1" styleClass="page-info"/>
+        <Button fx:id="nextPageButton" text="Suivant ▶" onAction="#handleNextPage" styleClass="btn-nav"/>
+    </HBox>
+</VBox>

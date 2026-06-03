@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.elearning.fx.controller.CourseDetailController"
+      styleClass="page-root" spacing="20" prefWidth="1200" prefHeight="750">
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <!-- En-tête -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Button fx:id="backButton" text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+        <VBox>
+            <Label fx:id="courseTitleLabel" styleClass="page-title"/>
+            <Label fx:id="courseMetaLabel" styleClass="course-meta-detail"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="enrollButton" text="📝 S'inscrire" onAction="#handleEnroll"
+                styleClass="btn-success"/>
+    </HBox>
+
+    <Label fx:id="courseDescLabel" styleClass="course-description-detail" wrapText="true"/>
+
+    <ProgressIndicator fx:id="loadingIndicator" visible="false" prefWidth="40" prefHeight="40"/>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox spacing="20">
+            <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+
+            <!-- Section Ressources -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="📎 Ressources Pédagogiques" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="uploadButton" text="⬆ Uploader" onAction="#handleUpload" styleClass="btn-primary"/>
+            </HBox>
+            <VBox fx:id="resourcesBox" spacing="8" styleClass="section-content"/>
+
+            <Separator/>
+
+            <!-- Section Séances Live -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="🎥 Séances en Direct" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="addSessionButton" text="+ Planifier" onAction="#handleAddSession" styleClass="btn-primary"/>
+            </HBox>
+            <VBox fx:id="sessionsBox" spacing="8" styleClass="section-content"/>
+        </VBox>
+    </ScrollPane>
+</VBox>
