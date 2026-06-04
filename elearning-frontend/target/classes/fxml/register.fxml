@@ -58,6 +58,11 @@
                     <ComboBox fx:id="roleComboBox" styleClass="text-input" maxWidth="Infinity"/>
                 </VBox>
 
+                <VBox fx:id="levelBox" spacing="5" managed="false" visible="false">
+                    <Label text="Niveau d'enseignement" styleClass="field-label"/>
+                    <ComboBox fx:id="levelComboBox" styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+
                 <Button fx:id="registerButton" text="Créer mon compte" onAction="#handleRegister"
                         styleClass="btn-primary" maxWidth="Infinity"/>
 

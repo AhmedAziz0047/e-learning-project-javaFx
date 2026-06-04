@@ -36,6 +36,14 @@ public class Course {
     @JoinColumn(name = "enseignant_id")
     private User enseignant;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_groups",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_group_id")
+    )
+    private java.util.Set<StudentGroup> targetGroups = new java.util.HashSet<>();
+
     @Column(nullable = false)
     private boolean actif = true;
 

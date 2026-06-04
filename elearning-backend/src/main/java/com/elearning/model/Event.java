@@ -45,6 +45,14 @@ public class Event {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "event_groups",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_group_id")
+    )
+    private java.util.Set<StudentGroup> targetGroups = new java.util.HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

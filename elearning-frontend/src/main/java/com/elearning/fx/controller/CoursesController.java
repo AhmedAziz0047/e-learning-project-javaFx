@@ -166,50 +166,91 @@ public class CoursesController implements Initializable {
 
     @FXML
     private void handleAddCourse() {
+        setLoading(true);
+        new Thread(() -> {
+            try {
+                java.util.List<JsonObject> groups = ApiClient.getGroups();
+                Platform.runLater(() -> {
+                    setLoading(false);
+                    showAddCourseDialog(groups);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    setLoading(false);
+                    SceneManager.showError("Erreur", "Impossible de charger les groupes : " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    private void showAddCourseDialog(java.util.List<JsonObject> groups) {
         Dialog<JsonObject> dialog = new Dialog<>();
         dialog.setTitle("Nouveau Cours");
-        dialog.setHeaderText("Créer un nouveau cours");
+        dialog.setHeaderText(null);
 
         ButtonType createBtn = new ButtonType("Créer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(createBtn, ButtonType.CANCEL);
 
+        // Même GridPane que le modal Nouvel Événement
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        grid.setPadding(new Insets(20, 20, 10, 20));
 
-        TextField titreField = new TextField();
-        TextArea descField = new TextArea();
-        descField.setPrefRowCount(3);
+        // Champs identiques au modal Événement
+        TextField titreField     = new TextField();
         TextField categorieField = new TextField();
-        TextField niveauField = new TextField();
-        TextField dureeField = new TextField();
+        TextField niveauField    = new TextField();
+        TextField dureeField     = new TextField();
+        dureeField.setPromptText("Durée (heures)");
 
-        grid.add(new Label("Titre :"), 0, 0);
-        grid.add(titreField, 1, 0);
-        grid.add(new Label("Description :"), 0, 1);
-        grid.add(descField, 1, 1);
-        grid.add(new Label("Catégorie :"), 0, 2);
-        grid.add(categorieField, 1, 2);
-        grid.add(new Label("Niveau :"), 0, 3);
-        grid.add(niveauField, 1, 3);
-        grid.add(new Label("Durée (heures) :"), 0, 4);
-        grid.add(dureeField, 1, 4);
+        TextArea descField = new TextArea();
+        descField.setPrefRowCount(2);
+        descField.setWrapText(true);
 
+        // Groupes — cases à cocher comme dans Événement
+        VBox groupsBox = new VBox(5);
+        java.util.List<CheckBox> checkBoxes = new java.util.ArrayList<>();
+        if (groups.isEmpty()) {
+            groupsBox.getChildren().add(new Label("Aucun groupe disponible"));
+        } else {
+            for (JsonObject group : groups) {
+                CheckBox cb = new CheckBox(group.get("name").getAsString());
+                cb.setUserData(group.get("id").getAsLong());
+                checkBoxes.add(cb);
+                groupsBox.getChildren().add(cb);
+            }
+        }
+
+        // Grille : label à gauche, champ à droite (même structure que Événement)
+        grid.add(new Label("Titre :"),        0, 0); grid.add(titreField,     1, 0);
+        grid.add(new Label("Description :"),  0, 1); grid.add(descField,      1, 1);
+        grid.add(new Label("Catégorie :"),    0, 2); grid.add(categorieField, 1, 2);
+        grid.add(new Label("Niveau :"),       0, 3); grid.add(niveauField,    1, 3);
+        grid.add(new Label("Durée :"),        0, 4); grid.add(dureeField,     1, 4);
+        grid.add(new Label("Groupes :"),      0, 5); grid.add(groupsBox,      1, 5);
+
+        // Pas de stylesheet personnalisé → look natif Windows comme Événement
         dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getStylesheets().add(
-                getClass().getResource("/css/style.css").toExternalForm());
 
         dialog.setResultConverter(dialogBtn -> {
             if (dialogBtn == createBtn) {
+                if (titreField.getText().trim().isEmpty()) return null;
                 JsonObject course = new JsonObject();
-                course.addProperty("titre", titreField.getText());
-                course.addProperty("description", descField.getText());
-                course.addProperty("categorie", categorieField.getText());
-                course.addProperty("niveau", niveauField.getText());
+                course.addProperty("titre",       titreField.getText().trim());
+                course.addProperty("description", descField.getText().trim());
+                course.addProperty("categorie",   categorieField.getText().trim());
+                course.addProperty("niveau",      niveauField.getText().trim());
                 try {
-                    course.addProperty("dureeHeures", Integer.parseInt(dureeField.getText()));
+                    course.addProperty("dureeHeures",
+                            Integer.parseInt(dureeField.getText().trim()));
                 } catch (NumberFormatException ignored) {}
+
+                com.google.gson.JsonArray targetGroupIds = new com.google.gson.JsonArray();
+                for (CheckBox cb : checkBoxes) {
+                    if (cb.isSelected()) targetGroupIds.add((Long) cb.getUserData());
+                }
+                course.add("targetGroupIds", targetGroupIds);
                 return course;
             }
             return null;
@@ -221,7 +262,8 @@ public class CoursesController implements Initializable {
                     ApiClient.createCourse(course);
                     Platform.runLater(this::loadCourses);
                 } catch (Exception e) {
-                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer le cours"));
+                    Platform.runLater(() -> SceneManager.showError("Erreur",
+                            "Impossible de créer le cours : " + e.getMessage()));
                 }
             }).start();
         });

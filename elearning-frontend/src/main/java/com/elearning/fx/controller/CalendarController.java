@@ -186,6 +186,17 @@ public class CalendarController implements Initializable {
 
     @FXML
     private void handleAddEvent() {
+        new Thread(() -> {
+            try {
+                List<JsonObject> groups = ApiClient.getGroups();
+                Platform.runLater(() -> showAddEventDialog(groups));
+            } catch (Exception e) {
+                Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de charger les groupes."));
+            }
+        }).start();
+    }
+
+    private void showAddEventDialog(List<JsonObject> groups) {
         Dialog<JsonObject> dialog = new Dialog<>();
         dialog.setTitle("Nouvel Événement");
         ButtonType createBtn = new ButtonType("Créer", ButtonBar.ButtonData.OK_DONE);
@@ -201,9 +212,7 @@ public class CalendarController implements Initializable {
         typeBox.getItems().addAll("COURS", "SEANCE_LIVE", "EXAMEN", "PROJET", "CERTIFICATION");
         typeBox.setValue("COURS");
         
-        // Date and Time inputs
         DatePicker datePicker = new DatePicker();
-        datePicker.setPromptText("Date");
         ComboBox<String> hourCombo = new ComboBox<>();
         for (int i = 0; i <= 23; i++) hourCombo.getItems().add(String.format("%02d", i));
         hourCombo.getSelectionModel().select("14");
@@ -212,33 +221,42 @@ public class CalendarController implements Initializable {
         for (int i = 0; i < 60; i += 5) minuteCombo.getItems().add(String.format("%02d", i));
         minuteCombo.getSelectionModel().select("00");
         
-        HBox timeBox = new HBox(5, datePicker, new Label(" à "), hourCombo, new Label(":"), minuteCombo);
-        timeBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox timeBox = new HBox(5, datePicker, hourCombo, new Label(":"), minuteCombo);
         TextField durationField = new TextField();
-        durationField.setPromptText("60");
+        durationField.setPromptText("Durée (min)");
 
         grid.add(new Label("Titre :"), 0, 0); grid.add(titleField, 1, 0);
-        grid.add(new Label("Description :"), 0, 1); grid.add(descField, 1, 1);
-        grid.add(new Label("Type :"), 0, 2); grid.add(typeBox, 1, 2);
-        grid.add(new Label("Date & Heure :"), 0, 3); grid.add(timeBox, 1, 3);
-        grid.add(new Label("Durée (min) :"), 0, 4); grid.add(durationField, 1, 4);
+        grid.add(new Label("Type :"), 0, 1); grid.add(typeBox, 1, 1);
+        grid.add(new Label("Date/Heure :"), 0, 2); grid.add(timeBox, 1, 2);
+        grid.add(new Label("Durée :"), 0, 3); grid.add(durationField, 1, 3);
+
+        VBox groupCheckBoxes = new VBox(5);
+        List<CheckBox> checkBoxes = new ArrayList<>();
+        for (JsonObject group : groups) {
+            CheckBox cb = new CheckBox(safeStr(group, "name"));
+            cb.setUserData(group.get("id").getAsString());
+            checkBoxes.add(cb);
+            groupCheckBoxes.getChildren().add(cb);
+        }
+        grid.add(new Label("Groupes :"), 0, 4); grid.add(new ScrollPane(groupCheckBoxes), 1, 4);
 
         dialog.getDialogPane().setContent(grid);
 
-        dialog.setResultConverter(dialogBtn -> {
-            if (dialogBtn == createBtn) {
-                if (datePicker.getValue() == null) return null;
-                
-                String dateStr = datePicker.getValue().toString();
-                String timeStr = hourCombo.getValue() + ":" + minuteCombo.getValue() + ":00";
-                
+        dialog.setResultConverter(btn -> {
+            if (btn == createBtn) {
                 JsonObject event = new JsonObject();
                 event.addProperty("title", titleField.getText());
                 event.addProperty("description", descField.getText());
                 event.addProperty("eventType", typeBox.getValue());
-                event.addProperty("eventDate", dateStr + "T" + timeStr);
+                event.addProperty("eventDate", datePicker.getValue() + "T" + hourCombo.getValue() + ":" + minuteCombo.getValue() + ":00");
                 try { event.addProperty("durationMinutes", Integer.parseInt(durationField.getText())); }
-                catch (Exception ignored) {}
+                catch (NumberFormatException ignored) {}
+                
+                com.google.gson.JsonArray targetGroupIds = new com.google.gson.JsonArray();
+                for (CheckBox cb : checkBoxes) {
+                    if (cb.isSelected()) targetGroupIds.add(Long.parseLong(cb.getUserData().toString()));
+                }
+                event.add("targetGroupIds", targetGroupIds);
                 return event;
             }
             return null;
@@ -250,8 +268,7 @@ public class CalendarController implements Initializable {
                     ApiClient.createEvent(event);
                     Platform.runLater(() -> { updateCalendar(); loadUpcomingEvents(); });
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer l'événement : " + e.getMessage()));
+                    Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de créer l'événement."));
                 }
             }).start();
         });

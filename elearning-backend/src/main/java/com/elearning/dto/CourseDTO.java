@@ -23,6 +23,7 @@ public class CourseDTO {
     private String enseignantNom;
     private boolean actif;
     private LocalDateTime createdAt;
+    private java.util.List<Long> targetGroupIds;
 
     // Statistiques
     private long nombreInscrits;

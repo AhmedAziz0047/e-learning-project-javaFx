@@ -18,5 +18,8 @@ public class UserDTO {
     private String role;
     private String avatar;
     private boolean actif;
+    private String studyLevel;
+    private Long groupId;
+    private String groupName;
     private LocalDateTime createdAt;
 }

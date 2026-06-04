@@ -52,14 +52,38 @@ public class ApiClient {
     }
 
     public static JsonObject register(String nom, String prenom, String email,
-                                       String motDePasse, String role) throws IOException, InterruptedException {
+                                       String motDePasse, String role, String studyLevel) throws IOException, InterruptedException {
         JsonObject body = new JsonObject();
         body.addProperty("nom", nom);
         body.addProperty("prenom", prenom);
         body.addProperty("email", email);
         body.addProperty("motDePasse", motDePasse);
         if (role != null) body.addProperty("role", role);
+        if (studyLevel != null) body.addProperty("studyLevel", studyLevel);
         return post("/auth/register", body);
+    }
+
+    // ==================== GROUPS & PROGRESSION ====================
+
+    public static List<JsonObject> getGroups() throws IOException, InterruptedException {
+        return getList("/groups");
+    }
+
+    public static JsonObject submitExam(double score) throws IOException, InterruptedException {
+        return post("/exams/submit?score=" + score, new JsonObject());
+    }
+
+    public static byte[] downloadDiploma() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/diploma/download"))
+                .header("Authorization", "Bearer " + SessionManager.getToken())
+                .GET()
+                .build();
+        HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        if (response.statusCode() >= 400) {
+            throw new IOException("Erreur HTTP " + response.statusCode());
+        }
+        return response.body();
     }
 
     // ==================== COURSES ====================

@@ -25,4 +25,7 @@ public class RegisterRequest {
 
     /** Optionnel — par défaut ROLE_STUDENT */
     private String role;
+
+    /** Optionnel — pour l'enseignant lors de son inscription */
+    private String studyLevel;
 }

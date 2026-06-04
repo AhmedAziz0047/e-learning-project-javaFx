@@ -22,6 +22,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseResourceRepository resourceRepository;
+    private final com.elearning.repository.StudentGroupRepository studentGroupRepository;
     private final UserService userService;
 
     /**
@@ -41,6 +42,11 @@ public class CourseService {
                 .actif(true)
                 .build();
 
+        if (dto.getTargetGroupIds() != null && !dto.getTargetGroupIds().isEmpty()) {
+            java.util.List<com.elearning.model.StudentGroup> groups = studentGroupRepository.findAllById(dto.getTargetGroupIds());
+            course.setTargetGroups(new java.util.HashSet<>(groups));
+        }
+
         course = courseRepository.save(course);
         return toDTO(course);
     }
@@ -55,10 +61,23 @@ public class CourseService {
     }
 
     /**
-     * Liste tous les cours actifs.
+     * Liste tous les cours actifs accessibles à l'utilisateur.
      */
     public List<CourseDTO> getAllActiveCourses() {
-        return courseRepository.findByActifTrue().stream()
+        User user = userService.getCurrentUser();
+        List<Course> courses = courseRepository.findByActifTrue();
+
+        if (user.getRole() == com.elearning.model.Role.ROLE_STUDENT && user.getStudyLevel() != com.elearning.model.StudyLevel.GRADUATED) {
+            courses = courses.stream()
+                    .filter(c -> c.getTargetGroups().isEmpty() || c.getTargetGroups().contains(user.getStudentGroup()))
+                    .collect(Collectors.toList());
+        } else if (user.getRole() == com.elearning.model.Role.ROLE_TEACHER) {
+            courses = courses.stream()
+                    .filter(c -> c.getEnseignant() != null && c.getEnseignant().getId().equals(user.getId()))
+                    .collect(Collectors.toList());
+        }
+
+        return courses.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -135,6 +154,8 @@ public class CourseService {
                         course.getEnseignant().getPrenom() + " " + course.getEnseignant().getNom() : null)
                 .actif(course.isActif())
                 .createdAt(course.getCreatedAt())
+                .targetGroupIds(course.getTargetGroups() != null ? 
+                        course.getTargetGroups().stream().map(com.elearning.model.StudentGroup::getId).collect(Collectors.toList()) : java.util.List.of())
                 .nombreInscrits(enrollmentRepository.countByCourseId(course.getId()))
                 .nombreRessources(resourceRepository.countByCourseId(course.getId()))
                 .build();

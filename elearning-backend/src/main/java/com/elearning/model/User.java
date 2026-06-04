@@ -39,6 +39,13 @@ public class User {
     @Column(nullable = false)
     private boolean actif = true;
 
+    @Enumerated(EnumType.STRING)
+    private StudyLevel studyLevel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_group_id")
+    private StudentGroup studentGroup;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

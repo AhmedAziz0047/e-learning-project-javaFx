@@ -29,4 +29,5 @@ public class EventDTO {
     private Long createdById;
     private String createdByNom;
     private LocalDateTime createdAt;
+    private java.util.List<Long> targetGroupIds;
 }

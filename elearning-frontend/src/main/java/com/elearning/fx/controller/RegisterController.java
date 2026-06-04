@@ -23,6 +23,8 @@ public class RegisterController implements Initializable {
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
     @FXML private ComboBox<String> roleComboBox;
+    @FXML private javafx.scene.layout.VBox levelBox;
+    @FXML private ComboBox<String> levelComboBox;
     @FXML private Button registerButton;
     @FXML private Label errorLabel;
     @FXML private Hyperlink loginLink;
@@ -34,6 +36,15 @@ public class RegisterController implements Initializable {
         loadingIndicator.setVisible(false);
         roleComboBox.getItems().addAll("ROLE_STUDENT", "ROLE_TEACHER");
         roleComboBox.setValue("ROLE_STUDENT");
+        
+        levelComboBox.getItems().addAll("LEVEL_1", "LEVEL_2", "LEVEL_3");
+        levelComboBox.setValue("LEVEL_1");
+        
+        roleComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            boolean isTeacher = "ROLE_TEACHER".equals(newVal);
+            levelBox.setVisible(isTeacher);
+            levelBox.setManaged(isTeacher);
+        });
     }
 
     @FXML
@@ -64,7 +75,8 @@ public class RegisterController implements Initializable {
 
         new Thread(() -> {
             try {
-                JsonObject response = ApiClient.register(nom, prenom, email, password, role);
+                String studyLevel = "ROLE_TEACHER".equals(role) ? levelComboBox.getValue() : null;
+                JsonObject response = ApiClient.register(nom, prenom, email, password, role, studyLevel);
 
                 if (response.has("token")) {
                     Platform.runLater(() -> {
@@ -74,7 +86,10 @@ public class RegisterController implements Initializable {
                                 response.get("nom").getAsString(),
                                 response.get("prenom").getAsString(),
                                 response.get("email").getAsString(),
-                                response.get("role").getAsString()
+                                response.get("role").getAsString(),
+                                response.has("studyLevel") && !response.get("studyLevel").isJsonNull() ? response.get("studyLevel").getAsString() : null,
+                                response.has("groupId") && !response.get("groupId").isJsonNull() ? response.get("groupId").getAsLong() : null,
+                                response.has("groupName") && !response.get("groupName").isJsonNull() ? response.get("groupName").getAsString() : null
                         );
                         SceneManager.showDashboard();
                     });

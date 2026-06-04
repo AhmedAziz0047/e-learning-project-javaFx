@@ -56,7 +56,10 @@ public class LoginController implements Initializable {
                                 response.get("nom").getAsString(),
                                 response.get("prenom").getAsString(),
                                 response.get("email").getAsString(),
-                                response.get("role").getAsString()
+                                response.get("role").getAsString(),
+                                response.has("studyLevel") && !response.get("studyLevel").isJsonNull() ? response.get("studyLevel").getAsString() : null,
+                                response.has("groupId") && !response.get("groupId").isJsonNull() ? response.get("groupId").getAsLong() : null,
+                                response.has("groupName") && !response.get("groupName").isJsonNull() ? response.get("groupName").getAsString() : null
                         );
                         SceneManager.showDashboard();
                     });

@@ -57,6 +57,25 @@ public class DashboardController implements Initializable {
             auditButton.setManaged(SessionManager.isAdmin());
         }
 
+        if (SessionManager.isStudent()) {
+            if ("GRADUATED".equals(SessionManager.getStudyLevel())) {
+                Button diplomaBtn = new Button("🎓 Mon Diplôme");
+                diplomaBtn.getStyleClass().add("nav-btn");
+                diplomaBtn.setOnAction(e -> handleDownloadDiploma());
+                sideMenu.getChildren().add(sideMenu.getChildren().size() - 1, diplomaBtn);
+                
+                if (liveButton != null) {
+                    liveButton.setVisible(false);
+                    liveButton.setManaged(false);
+                }
+            } else {
+                Button examBtn = new Button("📝 Passer l'examen");
+                examBtn.getStyleClass().add("nav-btn");
+                examBtn.setOnAction(e -> handlePassExam());
+                sideMenu.getChildren().add(sideMenu.getChildren().size() - 1, examBtn);
+            }
+        }
+
         loadDashboardData();
     }
 
@@ -180,6 +199,40 @@ public class DashboardController implements Initializable {
     @FXML private void handleLive() { SceneManager.showLiveSessions(); }
     @FXML private void handleTeacherDashboard() { SceneManager.showTeacherDashboard(); }
     @FXML private void handleAudit() { SceneManager.showAuditLogs(); }
+
+    private void handlePassExam() {
+        TextInputDialog dialog = new TextInputDialog("75");
+        dialog.setTitle("Examen de passage");
+        dialog.setHeaderText("Simulation d'examen (Entrez un score en %)");
+        dialog.setContentText("Score :");
+        dialog.showAndWait().ifPresent(scoreStr -> {
+            try {
+                double score = Double.parseDouble(scoreStr);
+                JsonObject res = ApiClient.submitExam(score);
+                String msg = res.has("message") ? res.get("message").getAsString() : "Résultat enregistré";
+                SceneManager.showError("Résultat de l'examen", msg);
+                // Relog for session update
+                SceneManager.showLogin();
+            } catch (Exception e) {
+                SceneManager.showError("Erreur", "Impossible de soumettre l'examen : " + e.getMessage());
+            }
+        });
+    }
+
+    private void handleDownloadDiploma() {
+        new Thread(() -> {
+            try {
+                byte[] pdfData = ApiClient.downloadDiploma();
+                java.io.File file = new java.io.File(System.getProperty("user.home") + "/Desktop/diplome.pdf");
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                    fos.write(pdfData);
+                }
+                Platform.runLater(() -> SceneManager.showError("Succès", "Diplôme téléchargé sur le bureau : " + file.getAbsolutePath()));
+            } catch (Exception e) {
+                Platform.runLater(() -> SceneManager.showError("Erreur", "Impossible de télécharger le diplôme : " + e.getMessage()));
+            }
+        }).start();
+    }
 
     @FXML
     private void handleLogout() {

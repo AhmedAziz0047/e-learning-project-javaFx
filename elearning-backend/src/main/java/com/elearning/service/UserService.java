@@ -4,8 +4,11 @@ import com.elearning.dto.*;
 import com.elearning.exception.BadRequestException;
 import com.elearning.exception.ResourceNotFoundException;
 import com.elearning.model.Role;
+import com.elearning.model.StudyLevel;
+import com.elearning.model.StudentGroup;
 import com.elearning.model.User;
 import com.elearning.repository.UserRepository;
+import com.elearning.repository.StudentGroupRepository;
 import com.elearning.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final StudentGroupRepository groupRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -43,14 +47,28 @@ public class UserService {
             }
         }
 
+        StudyLevel studyLevel = null;
+        if (role == Role.ROLE_TEACHER && request.getStudyLevel() != null) {
+            try {
+                studyLevel = StudyLevel.valueOf(request.getStudyLevel());
+            } catch (IllegalArgumentException ignored) {}
+        } else if (role == Role.ROLE_STUDENT) {
+            studyLevel = StudyLevel.LEVEL_1; // Par défaut
+        }
+
         User user = User.builder()
                 .nom(request.getNom())
                 .prenom(request.getPrenom())
                 .email(request.getEmail())
                 .motDePasse(passwordEncoder.encode(request.getMotDePasse()))
                 .role(role)
+                .studyLevel(studyLevel)
                 .actif(true)
                 .build();
+
+        if (role == Role.ROLE_STUDENT) {
+            assignToGroup(user, studyLevel);
+        }
 
         user = userRepository.save(user);
 
@@ -64,7 +82,33 @@ public class UserService {
                 .prenom(user.getPrenom())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .studyLevel(user.getStudyLevel() != null ? user.getStudyLevel().name() : null)
+                .groupId(user.getStudentGroup() != null ? user.getStudentGroup().getId() : null)
+                .groupName(user.getStudentGroup() != null ? user.getStudentGroup().getName() : null)
                 .build();
+    }
+
+    public void assignToGroup(User student, StudyLevel level) {
+        java.util.List<StudentGroup> groups = groupRepository.findByLevel(level);
+        StudentGroup targetGroup = null;
+
+        for (StudentGroup group : groups) {
+            if (group.getStudents().size() < 15) {
+                targetGroup = group;
+                break;
+            }
+        }
+
+        if (targetGroup == null) {
+            int nextNumber = groups.size() + 1;
+            targetGroup = StudentGroup.builder()
+                    .name("Niveau " + (level.ordinal() + 1) + " - Groupe " + nextNumber)
+                    .level(level)
+                    .build();
+            targetGroup = groupRepository.save(targetGroup);
+        }
+
+        student.setStudentGroup(targetGroup);
     }
 
     /**
@@ -89,6 +133,9 @@ public class UserService {
                 .prenom(user.getPrenom())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .studyLevel(user.getStudyLevel() != null ? user.getStudyLevel().name() : null)
+                .groupId(user.getStudentGroup() != null ? user.getStudentGroup().getId() : null)
+                .groupName(user.getStudentGroup() != null ? user.getStudentGroup().getName() : null)
                 .build();
     }
 
@@ -163,6 +210,9 @@ public class UserService {
                 .role(user.getRole().name())
                 .avatar(user.getAvatar())
                 .actif(user.isActif())
+                .studyLevel(user.getStudyLevel() != null ? user.getStudyLevel().name() : null)
+                .groupId(user.getStudentGroup() != null ? user.getStudentGroup().getId() : null)
+                .groupName(user.getStudentGroup() != null ? user.getStudentGroup().getName() : null)
                 .createdAt(user.getCreatedAt())
                 .build();
     }
